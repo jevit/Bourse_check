@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 import { simulateTax } from '../services/api'
 import type { EnveloppeType, TaxSimulation } from '../types'
 import { format } from 'date-fns'
+import InfoTooltip from '../components/InfoTooltip'
 
 function fmt(n: number) {
   return n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -34,7 +35,10 @@ export default function TaxPage() {
 
   return (
     <div className="space-y-6 max-w-2xl">
-      <h1 className="text-2xl font-bold">Simulation fiscale</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Simulation fiscale</h1>
+        <Link to="/help#help-fiscal" className="text-xs text-indigo-400 hover:text-indigo-300">Guide fiscal →</Link>
+      </div>
 
       <form onSubmit={handleSubmit} className="card space-y-4">
         <h2 className="font-semibold">Paramètres de la vente simulée</h2>
@@ -44,7 +48,10 @@ export default function TaxPage() {
             <input className="input uppercase" value={form.ticker} onChange={e => setForm(f => ({...f, ticker: e.target.value.toUpperCase()}))} required placeholder="AI.PA" />
           </div>
           <div>
-            <label className="label">Enveloppe *</label>
+            <label className="label">
+              Enveloppe *
+              <InfoTooltip title="Impact de l'enveloppe" content="PEA ≥5 ans : 17,2% PS seulement. CTO : flat tax 30%. AV ≥8 ans : 7,5% IR + 17,2% PS avec abattement 4 600€." />
+            </label>
             <select className="input" value={form.enveloppe} onChange={e => setForm(f => ({...f, enveloppe: e.target.value as EnveloppeType}))}>
               {(['PEA','CTO','AV','PEE','PERCO'] as EnveloppeType[]).map(e => <option key={e}>{e}</option>)}
             </select>

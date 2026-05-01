@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { PositionSnapshot } from '../types'
+import InfoTooltip from './InfoTooltip'
 
 type SortKey = keyof PositionSnapshot
 type SortDir = 'asc' | 'desc'
@@ -10,6 +11,21 @@ function fmt(n: number, digits = 2) {
 
 function fmtPct(n: number) {
   return (n >= 0 ? '+' : '') + fmt(n) + '%'
+}
+
+// Indicateur coloré générique
+function Pill({ value, label, positive }: { value: string; label?: string; positive: boolean | null }) {
+  const color = positive === null ? 'bg-gray-700 text-gray-300'
+    : positive ? 'bg-green-900/50 text-green-300 ring-1 ring-green-600/30'
+    : 'bg-red-900/50 text-red-300 ring-1 ring-red-600/30'
+  return (
+    <span className={`inline-flex items-center gap-1 text-xs font-mono font-semibold px-2 py-0.5 rounded-full ${color}`}>
+      {positive === true && <span>▲</span>}
+      {positive === false && <span>▼</span>}
+      {value}
+      {label && <span className="text-xs opacity-70 ml-0.5">{label}</span>}
+    </span>
+  )
 }
 
 interface Props {
@@ -46,49 +62,84 @@ export default function PositionTable({ positions }: Props) {
       <table className="min-w-full">
         <thead className="border-b border-gray-800">
           <tr>
-            {[
-              ['ticker', 'Ticker'],
-              ['enveloppe', 'Enveloppe'],
-              ['quantity', 'Qté'],
-              ['pru', 'PRU'],
-              ['currentPrice', 'Cours'],
-              ['currentValue', 'Valeur'],
-              ['latentPnl', 'PV Latente'],
-              ['latentPnlPct', 'PV %'],
-              ['yoc', 'YoC'],
-              ['annualDividend', 'Div/an'],
-            ].map(([k, label]) => (
-              <th key={k} className="th" onClick={() => toggleSort(k as SortKey)}>
-                {label}<SortIcon k={k as SortKey} />
-              </th>
-            ))}
+            <th className="th" onClick={() => toggleSort('ticker')}>
+              Ticker<SortIcon k="ticker" />
+            </th>
+            <th className="th">Env.</th>
+            <th className="th" onClick={() => toggleSort('quantity')}>
+              Qté<SortIcon k="quantity" />
+            </th>
+            <th className="th" onClick={() => toggleSort('pru')}>
+              PRU<InfoTooltip title="Prix de Revient Unitaire" content="Coût réel par action, frais inclus. Seuil de rentabilité de votre position. Recalculé depuis toutes vos transactions." />
+              <SortIcon k="pru" />
+            </th>
+            <th className="th" onClick={() => toggleSort('currentPrice')}>
+              Cours<SortIcon k="currentPrice" />
+            </th>
+            <th className="th" onClick={() => toggleSort('currentValue')}>
+              Valeur<SortIcon k="currentValue" />
+            </th>
+            <th className="th" onClick={() => toggleSort('latentPnl')}>
+              PV Latente<InfoTooltip title="Plus-Value Latente" content="Gain non réalisé = (cours actuel − PRU) × quantité. Devient imposable uniquement à la vente." />
+              <SortIcon k="latentPnl" />
+            </th>
+            <th className="th" onClick={() => toggleSort('latentPnlPct')}>
+              PV %<SortIcon k="latentPnlPct" />
+            </th>
+            <th className="th" onClick={() => toggleSort('yoc')}>
+              YoC<InfoTooltip title="Yield on Cost" content="Rendement sur votre prix d'achat = dividende annuel net / (PRU × quantité) × 100. Plus fidèle que le yield de marché pour un investisseur long terme." />
+              <SortIcon k="yoc" />
+            </th>
+            <th className="th" onClick={() => toggleSort('annualDividend')}>
+              Div/an<InfoTooltip title="Dividendes annuels nets" content="Somme des dividendes nets perçus sur les 12 derniers mois pour cette position." />
+              <SortIcon k="annualDividend" />
+            </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-800/50">
-          {sorted.map(p => (
-            <tr key={p.ticker} className="hover:bg-gray-800/30 transition-colors">
-              <td className="td font-mono font-semibold text-indigo-300">{p.ticker}</td>
-              <td className="td">
-                <span className="text-xs bg-gray-800 px-2 py-0.5 rounded">{p.enveloppe}</span>
-              </td>
-              <td className="td font-mono">{fmt(p.quantity, 4)}</td>
-              <td className="td font-mono">{fmt(p.pru)}</td>
-              <td className="td font-mono">{fmt(p.currentPrice)}</td>
-              <td className="td font-mono font-semibold">{fmt(p.currentValue)} €</td>
-              <td className={`td font-mono ${p.latentPnl >= 0 ? 'gain' : 'loss'}`}>
-                {p.latentPnl >= 0 ? '+' : ''}{fmt(p.latentPnl)} €
-              </td>
-              <td className={`td font-mono ${p.latentPnlPct >= 0 ? 'gain' : 'loss'}`}>
-                {fmtPct(p.latentPnlPct)}
-              </td>
-              <td className="td font-mono text-yellow-400">
-                {p.yoc > 0 ? fmt(p.yoc) + '%' : '—'}
-              </td>
-              <td className="td font-mono text-green-300">
-                {p.annualDividend > 0 ? fmt(p.annualDividend) + ' €' : '—'}
-              </td>
-            </tr>
-          ))}
+          {sorted.map(p => {
+            const pnlPositive = p.latentPnl >= 0
+            const yocGood = p.yoc >= 3
+            const yocGreat = p.yoc >= 5
+
+            return (
+              <tr key={p.ticker} className="hover:bg-gray-800/30 transition-colors">
+                <td className="td font-mono font-semibold text-indigo-300">{p.ticker}</td>
+                <td className="td">
+                  <span className="text-xs bg-gray-800 px-2 py-0.5 rounded font-mono">{p.enveloppe}</span>
+                </td>
+                <td className="td font-mono text-gray-300">{fmt(p.quantity, 4)}</td>
+                <td className="td font-mono text-gray-300">{fmt(p.pru)} €</td>
+                <td className="td font-mono font-semibold">{fmt(p.currentPrice)} €</td>
+                <td className="td font-mono font-bold">{fmt(p.currentValue)} €</td>
+                <td className="td">
+                  <Pill
+                    value={(pnlPositive ? '+' : '') + fmt(p.latentPnl) + ' €'}
+                    positive={pnlPositive}
+                  />
+                </td>
+                <td className="td">
+                  <Pill
+                    value={(p.latentPnlPct >= 0 ? '+' : '') + fmt(p.latentPnlPct) + '%'}
+                    positive={pnlPositive}
+                  />
+                </td>
+                <td className="td">
+                  {p.yoc > 0
+                    ? <Pill
+                        value={fmt(p.yoc) + '%'}
+                        positive={yocGood}
+                        label={yocGreat ? '🔥' : undefined}
+                      />
+                    : <span className="text-gray-600">—</span>
+                  }
+                </td>
+                <td className="td font-mono text-green-300">
+                  {p.annualDividend > 0 ? fmt(p.annualDividend) + ' €' : '—'}
+                </td>
+              </tr>
+            )
+          })}
         </tbody>
       </table>
     </div>

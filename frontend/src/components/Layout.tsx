@@ -24,6 +24,10 @@ export default function Layout() {
               `px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-700 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800'}`}>
               Alertes
             </NavLink>
+            <NavLink to="/help" className={({ isActive }) =>
+              `px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-700 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800'}`}>
+              Guide
+            </NavLink>
           </nav>
         </div>
         <div className="flex items-center gap-3 text-sm text-gray-400">

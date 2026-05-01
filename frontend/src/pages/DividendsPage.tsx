@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 import { getDividends, createDividend, deleteDividend, getDividendSummary, getDividendProjection } from '../services/api'
 import type { DividendEvent, MonthlySummary, ProjectionYear } from '../types'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid } from 'recharts'
 import { format } from 'date-fns'
+import InfoTooltip from '../components/InfoTooltip'
 
 function fmt(n: number) {
   return n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -64,11 +65,11 @@ export default function DividendsPage() {
       {summary && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="card">
-            <p className="text-gray-400 text-xs uppercase tracking-wide mb-1">Année en cours</p>
+            <p className="text-gray-400 text-xs uppercase tracking-wide mb-1">Année en cours <InfoTooltip content="Somme des dividendes nets perçus depuis le 1er janvier de l'année en cours." /></p>
             <p className="text-2xl font-bold text-green-400">{fmt(summary.totalCurrentYear)} €</p>
           </div>
           <div className="card">
-            <p className="text-gray-400 text-xs uppercase tracking-wide mb-1">12 mois glissants</p>
+            <p className="text-gray-400 text-xs uppercase tracking-wide mb-1">12 mois glissants <InfoTooltip content="Dividendes nets des 12 derniers mois calendaires. Base de calcul du YoC et de la projection FIRE." /></p>
             <p className="text-2xl font-bold text-green-300">{fmt(summary.rollingTwelveMonths)} €</p>
           </div>
           <div className="card">
@@ -142,7 +143,10 @@ export default function DividendsPage() {
       {/* US-304: Projection */}
       <div className="card">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-semibold">Projection dividendes</h2>
+          <h2 className="font-semibold flex items-center">
+            Projection dividendes
+            <InfoTooltip title="Projection DGR" content="Div(n) = Div(0) × (1 + DGR/100)^n. Le DGR (Dividend Growth Rate) est le taux de croissance annuel des dividendes. Les aristocrates du dividende affichent historiquement 5–8% / an." />
+          </h2>
           <div className="flex gap-3 items-center text-sm">
             <label className="text-gray-400">DGR :</label>
             <input type="number" className="input w-20 text-center" value={dgr} step="0.5" min="0" max="30"
