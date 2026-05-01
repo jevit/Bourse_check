@@ -7,6 +7,7 @@ import TransactionsPage from './pages/TransactionsPage'
 import DividendsPage from './pages/DividendsPage'
 import TaxPage from './pages/TaxPage'
 import AlertsPage from './pages/AlertsPage'
+import AnalysisPage from './pages/AnalysisPage'
 import Layout from './components/Layout'
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -25,6 +26,7 @@ function AppRoutes() {
         <Route path="portfolios/:id/transactions" element={<TransactionsPage />} />
         <Route path="portfolios/:id/dividends" element={<DividendsPage />} />
         <Route path="portfolios/:id/tax" element={<TaxPage />} />
+        <Route path="portfolios/:id/analysis" element={<AnalysisPage />} />
         <Route path="alerts" element={<AlertsPage />} />
       </Route>
     </Routes>

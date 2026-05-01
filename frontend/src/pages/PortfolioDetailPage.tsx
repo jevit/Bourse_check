@@ -41,6 +41,7 @@ export default function PortfolioDetailPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Dashboard portefeuille</h1>
         <div className="flex gap-2">
+          <Link to={`/portfolios/${id}/analysis`} className="btn-primary text-sm">Analyse 📊</Link>
           <Link to={`/portfolios/${id}/transactions`} className="btn-secondary text-sm">Transactions</Link>
           <Link to={`/portfolios/${id}/dividends`} className="btn-secondary text-sm">Dividendes</Link>
           <Link to={`/portfolios/${id}/tax`} className="btn-secondary text-sm">Fiscalité</Link>
